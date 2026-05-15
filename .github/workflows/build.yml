@@ -1,0 +1,36 @@
+name: Build Practice1 WinUI CMake App
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
+      - name: Restore NuGet packages
+        run: nuget restore packages.config -PackagesDirectory packages
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64
+
+      - name: Build with CMake
+        run: cmake --build build --config Release
+
+      - name: Upload Release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Practice1-Release
+          path: |
+            x64/Release/**
+            AppPackages/**
