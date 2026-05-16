@@ -7,4 +7,10 @@
   <Project Path="Practice1.vcxproj" Id="1358bbb6-e808-4487-ac06-d951d53f0bea">
     <Deploy />
   </Project>
+  <Project Path="Practice2/Practice2.vcxproj" Id="55a4b424-2c76-482f-be88-1ee7bb24410c">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
+  <Project Path="Practice2Gui/Practice2Gui.vcxproj" Id="4ffa72d5-0d0e-402c-9d44-eca25a4d7dc3">
+    <Platform Solution="*|ARM64" Project="x64" />
+  </Project>
 </Solution>

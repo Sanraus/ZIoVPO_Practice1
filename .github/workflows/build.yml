@@ -1,4 +1,4 @@
-name: Build Practice1 WinUI CMake App
+name: Build Practice1 Practice2
 
 on:
   push:
@@ -19,7 +19,36 @@ jobs:
         uses: NuGet/setup-nuget@v2
 
       - name: Restore NuGet packages
-        run: nuget restore packages.config -PackagesDirectory packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $packagesDir = Join-Path $PWD "packages"
+
+          $packageConfigs = Get-ChildItem -Path . -Recurse -Filter packages.config |
+            Where-Object {
+              $_.FullName -notmatch "\\packages\\" -and
+              $_.FullName -notmatch "\\build\\"
+            }
+
+          foreach ($config in $packageConfigs) {
+            Write-Host "Restoring NuGet packages from $($config.FullName)"
+
+            for ($i = 1; $i -le 5; $i++) {
+              nuget restore $config.FullName -PackagesDirectory $packagesDir -NonInteractive
+
+              if ($LASTEXITCODE -eq 0) {
+                Write-Host "Restore completed for $($config.FullName)"
+                break
+              }
+
+              if ($i -eq 5) {
+                throw "NuGet restore failed for $($config.FullName)"
+              }
+
+              Start-Sleep -Seconds (15 * $i)
+            }
+          }
 
       - name: Configure CMake
         run: cmake -S . -B build -A x64
@@ -30,7 +59,7 @@ jobs:
       - name: Upload Release artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Practice1-Release
+          name: Practice-Release
           path: |
             x64/Release/**
             AppPackages/**

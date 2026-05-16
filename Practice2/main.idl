@@ -1,0 +1,10 @@
+namespace Practice2
+{
+    [bindable]
+    [default_interface]
+    runtimeclass main 
+    {
+        main();
+        Int32 MyProperty;
+    }
+}
