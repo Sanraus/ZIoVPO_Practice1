@@ -1,0 +1,9 @@
+[
+    uuid(8f7b7c3a-2e8d-44b8-a4e1-4b4c9a1c2f10),
+    version(1.0),
+    implicit_handle(handle_t Practice2RpcBinding)
+]
+interface Practice2Rpc
+{
+    void StopPractice2Service(void);
+}
