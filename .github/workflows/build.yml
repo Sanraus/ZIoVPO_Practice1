@@ -1,36 +1,30 @@
-name: Build Practice1 WinUI CMake App
-
-on:
-  push:
-  pull_request:
-
-jobs:
-  build:
-    runs-on: windows-2025
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2
-
       - name: Restore NuGet packages
-        run: nuget restore packages.config -PackagesDirectory packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
 
-      - name: Configure CMake
-        run: cmake -S . -B build -A x64
+          $packagesDir = Join-Path $PWD "packages"
 
-      - name: Build with CMake
-        run: cmake --build build --config Release
+          $packageConfigs = Get-ChildItem -Path . -Recurse -Filter packages.config |
+            Where-Object {
+              $_.FullName -notmatch "\\packages\\" -and
+              $_.FullName -notmatch "\\build\\"
+            }
 
-      - name: Upload Release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Practice1-Release
-          path: |
-            x64/Release/**
-            AppPackages/**
+          foreach ($config in $packageConfigs) {
+            Write-Host "Restoring NuGet packages from $($config.FullName)"
+
+            for ($i = 1; $i -le 5; $i++) {
+              nuget restore $config.FullName -PackagesDirectory $packagesDir -NonInteractive
+
+              if ($LASTEXITCODE -eq 0) {
+                break
+              }
+
+              if ($i -eq 5) {
+                throw "NuGet restore failed for $($config.FullName)"
+              }
+
+              Start-Sleep -Seconds (15 * $i)
+            }
+          }
