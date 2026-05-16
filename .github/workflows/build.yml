@@ -1,3 +1,23 @@
+name: Build Practice1 Practice2
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-2025
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2
+
       - name: Restore NuGet packages
         shell: pwsh
         run: |
@@ -18,6 +38,7 @@
               nuget restore $config.FullName -PackagesDirectory $packagesDir -NonInteractive
 
               if ($LASTEXITCODE -eq 0) {
+                Write-Host "Restore completed for $($config.FullName)"
                 break
               }
 
@@ -28,3 +49,17 @@
               Start-Sleep -Seconds (15 * $i)
             }
           }
+
+      - name: Configure CMake
+        run: cmake -S . -B build -A x64
+
+      - name: Build with CMake
+        run: cmake --build build --config Release
+
+      - name: Upload Release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Practice-Release
+          path: |
+            x64/Release/**
+            AppPackages/**
